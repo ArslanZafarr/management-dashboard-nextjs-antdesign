@@ -1,15 +1,32 @@
 "use client";
 import { Button, Form, Input, message } from "antd";
-import React from "react";
+import React, { useMemo } from "react";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
-const page = () => {
+const Page = () => {
+  const router = useRouter()
+  
   const correctUsername = "admin";
   const correctPassword = "admin";
+
+  // Set cookie with an expiration time of 14 days
+  const expirationTime = 14 * 24 * 60 * 60; // 14 days in seconds
+  const currentTime = new Date().getTime() / 1000; // Convert milliseconds to seconds
+  const expirationDate = useMemo(() => {
+    return new Date((currentTime + expirationTime) * 1000);
+  }, [currentTime, expirationTime]);
 
   const onFinish = (values) => {
     const { username, password } = values;
     if (username === correctUsername && password === correctPassword) {
       message.success("User logged in successfully");
+
+      Cookies.set("userSession", JSON.stringify(values), {
+        expires: expirationDate,
+      });
+      router.push("/")
+    
     } else {
       message.error("Incorrect username or password");
     }
@@ -66,4 +83,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
