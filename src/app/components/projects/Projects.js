@@ -1,66 +1,105 @@
 "use client";
 import React from "react";
-import { Layout, Table,  Button } from "antd";
+import { Layout, Table, Button, Spin, Alert, Tooltip } from "antd";
+import { useQuery } from "@tanstack/react-query";
+import { EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { Content } = Layout;
 
 const columns = [
   {
-    title: "Project Name",
-    dataIndex: "name",
-    key: "name",
+    title: "ID",
+    dataIndex: "id",
+    key: "id",
+    align: "center",
+    width: 100,
   },
   {
-    title: "Description",
-    dataIndex: "description",
-    key: "description",
+    title: "Project",
+    dataIndex: "title",
+    key: "title",
+  },
+  {
+    title: "Completed",
+    dataIndex: "completed",
+    key: "completed",
+    render: (completed) => (completed ? "Yes" : "No"),
+    align: "center",
+    width: 160,
   },
   {
     title: "Actions",
     key: "actions",
+    align: "center",
+    width: 140,
     render: () => (
-      <>
-        <Button type="primary" ghost>
-          View
-        </Button>
-        <Button type="primary" ghost>
-          Edit
-        </Button>
-        <Button type="primary" danger ghost>
-          Delete
-        </Button>
-      </>
+      <div className="flex justify-around">
+        <Tooltip title="View">
+          <Button
+            type="text"
+            shape="circle"
+            icon={<EyeOutlined style={{ color: "#1890ff" }} />}
+            className="action-button"
+          />
+        </Tooltip>
+        <Tooltip title="Edit">
+          <Button
+            type="text"
+            shape="circle"
+            icon={<EditOutlined style={{ color: "#52c41a" }} />}
+            className="action-button"
+          />
+        </Tooltip>
+        <Tooltip title="Delete">
+          <Button
+            type="text"
+            shape="circle"
+            icon={<DeleteOutlined style={{ color: "#f5222d" }} />}
+            className="action-button"
+          />
+        </Tooltip>
+      </div>
     ),
   },
 ];
 
-const data = [
-  {
-    key: "1",
-    name: "Project 1",
-    description: "Description of Project 1",
-  },
-  {
-    key: "2",
-    name: "Project 2",
-    description: "Description of Project 2",
-  },
-  {
-    key: "3",
-    name: "Project 3",
-    description: "Description of Project 3",
-  },
-];
-
 const Projects = () => {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["todo"],
+    queryFn: () =>
+      fetch("https://jsonplaceholder.typicode.com/todos").then((res) =>
+        res.json()
+      ),
+  });
+
+  if (isLoading) {
+    return (
+      <Content className="flex justify-center items-center h-screen">
+        <Spin size="large" />
+      </Content>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Content className="flex justify-center items-center h-screen">
+        <Alert message="Error fetching data" type="error" />
+      </Content>
+    );
+  }
+
   return (
     <Content className="p-4 bg-gray-100">
       <div className="py-4 px-20">
-        <h1 className="text-3xl font-bold mb-4">Greetings!</h1>
-        <h2 className="text-lg font-semibold mb-8">
-          Welcome to the Dashboard Screen
-        </h2>
-        <Table columns={columns} dataSource={data} />
+        <h1 className="text-3xl font-bold text-center mb-4">Projects Table</h1>
+        <Table
+          loading={isLoading}
+          columns={columns}
+          dataSource={data}
+          rowKey="id"
+          pagination={{ pageSize: 10 }}
+          bordered
+        />
       </div>
     </Content>
   );
