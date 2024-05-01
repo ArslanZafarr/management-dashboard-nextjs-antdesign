@@ -273,6 +273,7 @@ const Page = () => {
             columns={columns}
             dataSource={filteredData}
             pagination={false}
+            scroll={{ x: true }}
             className="mb-8"
           />
 
