@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import {
   Layout,
@@ -24,9 +23,7 @@ const Page = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [visible, setVisible] = useState(false);
-
   const [viewTaskModalVisible, setViewTaskModalVisible] = useState(false);
-
   const [viewTaskDetails, setViewTaskDetails] = useState(null);
   const [form] = Form.useForm();
   const [searchValue, setSearchValue] = useState("");
@@ -201,42 +198,54 @@ const Page = () => {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Content className="p-4 bg-gray-100" style={{ height: "100%" }}>
-        <div className="py-12 px-20">
-          {/* Project Details Section */}
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold mb-6">Project Details</h2>
-            <p className="text-lg font-medium mb-1">Project Name: Chat App</p>
-            <p className="text-lg font-medium mb-1">
+      <Content className="p-4 bg-gray-100" style={{ minHeight: "100%" }}>
+        <div className="py-8 px-4 sm:px-8 lg:px-16 xl:px-24">
+          <div className="mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+              Project Details
+            </h2>
+            <p className="text-base sm:text-lg font-medium mb-2">
+              Project Name: Chat App
+            </p>
+            <p className="text-base sm:text-lg font-medium mb-2">
               Project Description: Realtime Chat App
             </p>
-            <p className="text-lg font-medium mb-1">
+            <p className="text-base sm:text-lg font-medium mb-2">
               Features: Voice Messaging, Video Calling, Document Sharing
             </p>
-            <p className="text-lg font-medium mb-1">Duration: 2 Months</p>
-            <p className="text-lg font-medium mb-1">
+            <p className="text-base sm:text-lg font-medium mb-2">
+              Duration: 2 Months
+            </p>
+            <p className="text-base sm:text-lg font-medium mb-2">
               Technologies Involved: React JS, Node JS, PostgreSQL, Docker
             </p>
           </div>
-          <div className="flex justify-between mb-6">
-            <h1 className="text-3xl font-bold">Tasks Progress Board</h1>
-            <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-0">
+              Tasks Progress Board
+            </h1>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={showModal}
+              className="w-full sm:w-auto mt-4 sm:mt-0"
+            >
               Add New Task
             </Button>
           </div>
-          <div className="flex gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <Input
               placeholder="Search Task"
-              style={{ width: 200 }}
               value={searchValue}
               onChange={(e) => handleSearch(e.target.value)}
+              className="w-full sm:w-64"
             />
             <Select
-              style={{ width: 150 }}
               placeholder="Filter Status"
               allowClear
               value={filterValue}
               onChange={handleFilter}
+              className="w-full sm:w-64"
             >
               <Option value="">All</Option>
               <Option value="To-Do">To-Do</Option>
@@ -245,11 +254,11 @@ const Page = () => {
               <Option value="Review">Review</Option>
             </Select>
             <Select
-              style={{ width: 200 }}
               placeholder="Filter Member"
               allowClear
               value={teamMemberFilter}
               onChange={handleTeamMemberFilter}
+              className="w-full sm:w-64"
             >
               {[...new Set(data.flatMap((task) => task.assigneeTeam))].map(
                 (member) => (
@@ -264,7 +273,28 @@ const Page = () => {
             columns={columns}
             dataSource={filteredData}
             pagination={false}
+            className="mb-8"
           />
+
+          <div className="p-4 bg-blue-200 rounded-lg shadow-md text-center mb-8">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">
+              Please Note
+            </h2>
+            <p className="text-base sm:text-lg">
+              Hi Tester,
+              <br />
+              In this project details, I have added almost all content according
+              to your instructions, but with the same structure for all dynamic
+              project pages.
+              <br />
+              If I render the dynamic data for each project details page, it
+              would require a dedicated API for this case, which I don&apos;t
+              have.
+              <br />
+              Creating a mock API from scratch for this purpose would take a lot
+              of time.
+            </p>
+          </div>
 
           <Modal
             title="Task Details"

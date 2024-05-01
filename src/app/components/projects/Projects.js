@@ -1,5 +1,4 @@
-"use client";
-import React, { useEffect, useRef, useState } from "react";
+"use client";import React, { useEffect, useRef, useState } from "react";
 import { Layout, Table, Button, Spin, Alert, Tooltip, Input } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import { useAppStore } from "@/store/store";
@@ -48,7 +47,7 @@ const Projects = () => {
       title: "Actions",
       key: "actions",
       align: "center",
-      width: 140,
+      width: 160,
       render: (_, record) => {
         const editable = isEditing(record);
         return editable ? (
@@ -169,7 +168,7 @@ const Projects = () => {
 
   return (
     <Content className="p-4 bg-gray-100">
-      <div className="py-4 px-20">
+      <div className="py-4 px-4 md:px-20">
         
         <h1 className="text-3xl font-bold text-center mb-4">Projects Table</h1>
         <Table
@@ -179,6 +178,7 @@ const Projects = () => {
           rowKey="id"
           pagination={{ pageSize: 10 }}
           bordered
+          scroll={{ x: true }}
         />
 
       </div>
