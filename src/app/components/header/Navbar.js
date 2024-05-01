@@ -2,15 +2,20 @@
 import React, { useState } from "react";
 import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { Layout, Avatar, Dropdown, Menu } from "antd";
+import Cookies from "js-cookie";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-const { Header, Content } = Layout;
+const { Header } = Layout;
 
 const Navbar = () => {
-  const [collapsed, setCollapsed] = useState(false);
-
+  const router = useRouter();
   const handleMenuClick = ({ key }) => {
     if (key === "logout") {
       // Handle logout action
+
+      Cookies.remove("user");
+      router.push("/login");
     }
   };
 
@@ -25,14 +30,15 @@ const Navbar = () => {
 
   return (
     <Header className="bg-white shadow flex items-center justify-between px-20 bg-gray-100">
-    <div className="text-lg font-semibold">Management Dashboard</div>
-    <div>
-      <Dropdown overlay={menu} trigger={["click"]}>
-        <Avatar icon={<UserOutlined />} />
-      </Dropdown>
-    </div>
-  </Header>
-   
+      <Link href="/">
+        <div className="text-lg font-semibold">Management Dashboard</div>
+      </Link>
+      <div>
+        <Dropdown overlay={menu} trigger={["click"]}>
+          <Avatar icon={<UserOutlined />} />
+        </Dropdown>
+      </div>
+    </Header>
   );
 };
 

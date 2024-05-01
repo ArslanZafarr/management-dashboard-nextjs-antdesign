@@ -1,9 +1,9 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import {
   Layout,
   Table,
-  Tag,
   Avatar,
   Modal,
   Input,
@@ -24,6 +24,10 @@ const Page = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [visible, setVisible] = useState(false);
+
+  const [viewTaskModalVisible, setViewTaskModalVisible] = useState(false);
+
+  const [viewTaskDetails, setViewTaskDetails] = useState(null);
   const [form] = Form.useForm();
   const [searchValue, setSearchValue] = useState("");
   const [filterValue, setFilterValue] = useState(null);
@@ -83,18 +87,16 @@ const Page = () => {
       title: "Task Status",
       dataIndex: "taskStatus",
       key: "taskStatus",
-      render: (status) => (
-        <Tag
-          color={
-            status === "To-Do"
-              ? "orange"
-              : status === "In-Progress"
-              ? "blue"
-              : "green"
-          }
+      render: (status, record) => (
+        <Select
+          defaultValue={status}
+          onChange={(value) => changeStatus(record.id, value)}
         >
-          {status}
-        </Tag>
+          <Option value="To-Do">To-Do</Option>
+          <Option value="In-Progress">In-Progress</Option>
+          <Option value="Done">Done</Option>
+          <Option value="Review">Review</Option>
+        </Select>
       ),
     },
     {
@@ -117,7 +119,12 @@ const Page = () => {
   ];
 
   const handleViewDetails = (record) => {
-    console.log("View details:", record);
+    setViewTaskDetails(record);
+    setViewTaskModalVisible(true);
+  };
+
+  const handleViewTaskCancel = () => {
+    setViewTaskModalVisible(false);
   };
 
   const showModal = () => {
@@ -127,6 +134,17 @@ const Page = () => {
   const handleCancel = () => {
     setVisible(false);
     form.resetFields();
+  };
+
+  const changeStatus = (taskId, status) => {
+    const updatedData = data.map((task) => {
+      if (task.id === taskId) {
+        return { ...task, taskStatus: status };
+      }
+      return task;
+    });
+    setData(updatedData);
+    setFilteredData(updatedData);
   };
 
   const onFinish = (values) => {
@@ -182,117 +200,175 @@ const Page = () => {
   };
 
   return (
-    <Content className="p-4 bg-gray-100">
-      <div className="py-4 px-20">
-        <div className="flex justify-between mb-4">
-          <h1 className="text-3xl font-bold">Task Management System</h1>
-          <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
-            Add New Task
-          </Button>
-        </div>
-        <div className="flex gap-4 mb-4">
-          <Input
-            placeholder="Search Task"
-            style={{ width: 200 }}
-            value={searchValue}
-            onChange={(e) => handleSearch(e.target.value)}
+    <Layout style={{ minHeight: "100vh" }}>
+      <Content className="p-4 bg-gray-100" style={{ height: "100%" }}>
+        <div className="py-12 px-20">
+          {/* Project Details Section */}
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold mb-6">Project Details</h2>
+            <p className="text-lg font-medium mb-1">Project Name: Chat App</p>
+            <p className="text-lg font-medium mb-1">
+              Project Description: Realtime Chat App
+            </p>
+            <p className="text-lg font-medium mb-1">
+              Features: Voice Messaging, Video Calling, Document Sharing
+            </p>
+            <p className="text-lg font-medium mb-1">Duration: 2 Months</p>
+            <p className="text-lg font-medium mb-1">
+              Technologies Involved: React JS, Node JS, PostgreSQL, Docker
+            </p>
+          </div>
+          <div className="flex justify-between mb-6">
+            <h1 className="text-3xl font-bold">Tasks Progress Board</h1>
+            <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
+              Add New Task
+            </Button>
+          </div>
+          <div className="flex gap-4 mb-4">
+            <Input
+              placeholder="Search Task"
+              style={{ width: 200 }}
+              value={searchValue}
+              onChange={(e) => handleSearch(e.target.value)}
+            />
+            <Select
+              style={{ width: 150 }}
+              placeholder="Filter Status"
+              allowClear
+              value={filterValue}
+              onChange={handleFilter}
+            >
+              <Option value="">All</Option>
+              <Option value="To-Do">To-Do</Option>
+              <Option value="In-Progress">In-Progress</Option>
+              <Option value="Done">Done</Option>
+              <Option value="Review">Review</Option>
+            </Select>
+            <Select
+              style={{ width: 200 }}
+              placeholder="Filter Member"
+              allowClear
+              value={teamMemberFilter}
+              onChange={handleTeamMemberFilter}
+            >
+              {[...new Set(data.flatMap((task) => task.assigneeTeam))].map(
+                (member) => (
+                  <Option key={member} value={member}>
+                    {member}
+                  </Option>
+                )
+              )}
+            </Select>
+          </div>
+          <Table
+            columns={columns}
+            dataSource={filteredData}
+            pagination={false}
           />
-          <Select
-            style={{ width: 150 }}
-            placeholder="Filter Status"
-            allowClear
-            value={filterValue}
-            onChange={handleFilter}
-          >
-            <Option value="">All</Option>
-            <Option value="To-Do">To-Do</Option>
-            <Option value="In-Progress">In-Progress</Option>
-            <Option value="Done">Done</Option>
-            <Option value="Review">Review</Option>
-          </Select>
-          <Select
-            style={{ width: 200 }}
-            placeholder="Filter Team Member"
-            allowClear
-            value={teamMemberFilter}
-            onChange={handleTeamMemberFilter}
-          >
-            {data
-              .flatMap((task) => task.assigneeTeam)
-              .map((member) => (
-                <Option key={member} value={member}>
-                  {member}
-                </Option>
-              ))}
-          </Select>
-        </div>
-        <Table columns={columns} dataSource={filteredData} pagination={false} />
 
-        <Modal
-          title="Add New Task"
-          visible={visible}
-          onCancel={handleCancel}
-          footer={null}
-        >
-          <Form form={form} onFinish={onFinish} layout="vertical">
-            <Form.Item
-              name="taskTitle"
-              label="Task Title"
-              rules={[{ required: true, message: "Please enter task title" }]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              name="taskDescription"
-              label="Task Description"
-              rules={[
-                { required: true, message: "Please enter task description" },
-              ]}
-            >
-              <TextArea rows={4} />
-            </Form.Item>
-            <Form.Item
-              name="assigneeTeam"
-              label="Assignee Team"
-              rules={[
-                { required: true, message: "Please select assignee team" },
-              ]}
-            >
-              <Select mode="multiple">
-                <Option value="Usama">Usama</Option>
-                <Option value="Arslan">Arslan</Option>
-                <Option value="Haris">Haris</Option>
-                <Option value="Haroon">Haroon</Option>
-              </Select>
-            </Form.Item>
-            <Form.Item
-              name="taskStatus"
-              label="Task Status"
-              rules={[{ required: true, message: "Please select task status" }]}
-            >
-              <Select>
-                <Option value="To-Do">To-Do</Option>
-                <Option value="In-Progress">In-Progress</Option>
-                <Option value="Done">Done</Option>
-                <Option value="Review">Review</Option>
-              </Select>
-            </Form.Item>
-            <Form.Item
-              name="dateRange"
-              label="Date Range"
-              rules={[{ required: true, message: "Please select date range" }]}
-            >
-              <RangePicker />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Submit
-              </Button>
-            </Form.Item>
-          </Form>
-        </Modal>
-      </div>
-    </Content>
+          <Modal
+            title="Task Details"
+            visible={viewTaskModalVisible}
+            onCancel={handleViewTaskCancel}
+            footer={null}
+            className="rounded-lg"
+            bodyStyle={{ padding: "24px" }}
+          >
+            {viewTaskDetails && (
+              <div>
+                <p className="text-lg font-semibold mb-4">
+                  {viewTaskDetails.taskName}
+                </p>
+                <p>
+                  <strong>Assignee Team:</strong>{" "}
+                  {viewTaskDetails.assigneeTeam.join(", ")}
+                </p>
+                <p>
+                  <strong>Task Status:</strong> {viewTaskDetails.taskStatus}
+                </p>
+                <p>
+                  <strong>Assign Date:</strong> {viewTaskDetails.assignDate}
+                </p>
+                <p>
+                  <strong>Deadline:</strong> {viewTaskDetails.deadline}
+                </p>
+                <p>
+                  <strong>Description:</strong> {viewTaskDetails.description}
+                </p>
+              </div>
+            )}
+          </Modal>
+
+          <Modal
+            title="Add New Task"
+            visible={visible}
+            onCancel={handleCancel}
+            footer={null}
+          >
+            <Form form={form} onFinish={onFinish} layout="vertical">
+              <Form.Item
+                name="taskTitle"
+                label="Task Title"
+                rules={[{ required: true, message: "Please enter task title" }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name="taskDescription"
+                label="Task Description"
+                rules={[
+                  { required: true, message: "Please enter task description" },
+                ]}
+              >
+                <TextArea rows={4} />
+              </Form.Item>
+              <Form.Item
+                name="assigneeTeam"
+                label="Assignee Team"
+                rules={[
+                  { required: true, message: "Please select assignee team" },
+                ]}
+              >
+                <Select mode="multiple">
+                  <Option value="Usama">Usama</Option>
+                  <Option value="Arslan">Arslan</Option>
+                  <Option value="Haris">Haris</Option>
+                  <Option value="Haroon">Haroon</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item
+                name="taskStatus"
+                label="Task Status"
+                rules={[
+                  { required: true, message: "Please select task status" },
+                ]}
+              >
+                <Select>
+                  <Option value="To-Do">To-Do</Option>
+                  <Option value="In-Progress">In-Progress</Option>
+                  <Option value="Done">Done</Option>
+                  <Option value="Review">Review</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item
+                name="dateRange"
+                label="Date Range"
+                rules={[
+                  { required: true, message: "Please select date range" },
+                ]}
+              >
+                <RangePicker />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Submit
+                </Button>
+              </Form.Item>
+            </Form>
+          </Modal>
+        </div>
+      </Content>
+    </Layout>
   );
 };
 

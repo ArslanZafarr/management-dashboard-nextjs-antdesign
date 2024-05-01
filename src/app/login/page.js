@@ -5,8 +5,8 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
 const Page = () => {
-  const router = useRouter()
-  
+  const router = useRouter();
+
   const correctUsername = "admin";
   const correctPassword = "admin";
 
@@ -22,11 +22,11 @@ const Page = () => {
     if (username === correctUsername && password === correctPassword) {
       message.success("User logged in successfully");
 
-      Cookies.set("userSession", JSON.stringify(values), {
+      Cookies.set("user", JSON.stringify(values), {
         expires: expirationDate,
       });
-      router.push("/")
-    
+
+      router.push("/");
     } else {
       message.error("Incorrect username or password");
     }
